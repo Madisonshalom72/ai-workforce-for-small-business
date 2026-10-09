@@ -558,6 +558,7 @@
       <select id="aiwProvider">
         <option value="openai">OpenAI</option>
         <option value="anthropic">Anthropic</option>
+        <option value="gemini">Google Gemini</option>
       </select>
     </div>
     <div class="aiw-field">
@@ -1048,7 +1049,7 @@
     bookkeeping: "You are a meticulous bookkeeping assistant. You help log income and expenses, categorize transactions, and keep the books clean and reconcilable.",
     dispatch: "You are an automated inbound AI dispatch specialist for a high-tech service business. You design instant-response intake flows, smart routing rules, job dispatch packets, acknowledgment tracking, and real-time status updates. You replace manual phone-tag with automation while keeping a human override."
   };
-  var DEFAULT_MODEL = { openai: "gpt-4o-mini", anthropic: "claude-sonnet-4-20250514" };
+  var DEFAULT_MODEL = { openai: "gpt-4o-mini", anthropic: "claude-sonnet-4-20250514", gemini: "gemini-2.5-flash" };
   function cfg(){
     return {
       provider: localStorage.getItem("aiw_provider") || "openai",
@@ -1103,6 +1104,17 @@
     var j = await r.json();
     return j.content.map(function(b){ return b.text || ""; }).join("");
   }
+  async function callGemini(c, system, contents){
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(c.model || DEFAULT_MODEL.gemini) + ":generateContent?key=" + encodeURIComponent(c.key);
+    var r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: contents })
+    });
+    if(!r.ok){ var t = await r.text(); throw new Error("Gemini error " + r.status + ": " + t.slice(0,200)); }
+    var j2 = await r.json();
+    return j2.candidates[0].content.parts.map(function(p){ return p.text || ""; }).join("");
+  }
   async function send(){
     var input = $("aiwInput"); var text = input.value.trim();
     if(!text) return;
@@ -1122,6 +1134,9 @@
       if(c.provider === "anthropic"){
         var msgs = h.map(function(m){ return { role: m.role, content: m.text }; });
         reply = await callAnthropic(c, system, msgs);
+      } else if(c.provider === "gemini"){
+        var msgs3 = h.map(function(m){ return { role: m.role === "user" ? "user" : "model", parts: [{ text: m.text }] }; });
+        reply = await callGemini(c, system, msgs3);
       } else {
         var msgs2 = [{ role: "system", content: system }].concat(h.map(function(m){ return { role: m.role, content: m.text }; }));
         reply = await callOpenAI(c, msgs2);
