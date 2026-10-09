@@ -338,6 +338,34 @@
       .ticker-set[aria-hidden="true"] { display: none; }
     }
   </style>
+
+<style>
+.aiw-settings-row{display:flex;justify-content:flex-end;margin:0 0 12px}
+.aiw-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:inherit;font-weight:600;cursor:pointer;font-size:.9rem}
+.aiw-btn.primary{background:#4f7cff;border-color:#4f7cff;color:#fff}
+.aiw-btn:disabled{opacity:.5;cursor:wait}
+.aiw-dialog{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.aiw-dialog.open{display:flex}
+.aiw-card{background:#101828;color:#e8edf5;border-radius:16px;padding:22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.aiw-card h3{margin:0 0 4px}
+.aiw-card p{font-size:.85rem;opacity:.75;margin:0 0 14px}
+.aiw-field{margin-bottom:12px}
+.aiw-field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:4px;opacity:.85}
+.aiw-field input,.aiw-field select{width:100%;padding:.6rem .7rem;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#1a2436;color:#fff;font-size:.95rem;box-sizing:border-box}
+.aiw-row{display:flex;gap:.6rem;justify-content:flex-end;margin-top:16px}
+.aiw-note{font-size:.78rem;opacity:.65;margin-top:10px}
+.aiw-chat{margin-top:18px;border-top:1px solid rgba(255,255,255,.12);padding-top:14px}
+.aiw-chat h3{margin:0 0 8px;font-size:1rem}
+.aiw-log{display:flex;flex-direction:column;gap:.55rem;max-height:320px;overflow-y:auto;padding:.6rem;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(0,0,0,.25);margin-bottom:.6rem}
+.aiw-msg{padding:.55rem .75rem;border-radius:10px;font-size:.9rem;line-height:1.45;max-width:92%;white-space:pre-wrap;word-wrap:break-word}
+.aiw-msg.user{align-self:flex-end;background:#4f7cff;color:#fff}
+.aiw-msg.ai{align-self:flex-start;background:rgba(255,255,255,.1)}
+.aiw-msg.err{align-self:flex-start;background:rgba(200,60,60,.25);color:#ffb4b4}
+.aiw-msg.typing{opacity:.6;font-style:italic}
+.aiw-inputrow{display:flex;gap:.5rem}
+.aiw-inputrow input{flex:1;padding:.6rem .7rem;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#1a2436;color:#fff;font-size:.9rem}
+.aiw-status{font-size:.78rem;opacity:.65;margin-top:6px;min-height:1.1em}
+</style>
 </head>
 <body>
 <div class="page">
@@ -388,6 +416,11 @@
       <div class="section-head">
         <h2>Choose your specialist</h2>
         <p>Each tile opens a focused working window with practical playbooks and exportable results.</p>
+      </div>
+
+      
+      <div class="aiw-settings-row">
+        <button class="aiw-btn" type="button" id="aiwSettingsBtn">&#9881; AI Chat Settings</button>
       </div>
 
       <section class="agent-grid" aria-label="Specialist agents">
@@ -515,6 +548,35 @@
   </main>
 </div>
 
+
+<div class="aiw-dialog" id="aiwDialog" role="dialog" aria-modal="true" aria-label="AI chat settings">
+  <div class="aiw-card">
+    <h3>Live AI Chat Settings</h3>
+    <p>Paste your own API key to enable live chat with each specialist. The key is stored only in this browser and sent only to the provider you choose.</p>
+    <div class="aiw-field">
+      <label for="aiwProvider">Provider</label>
+      <select id="aiwProvider">
+        <option value="openai">OpenAI</option>
+        <option value="anthropic">Anthropic</option>
+      </select>
+    </div>
+    <div class="aiw-field">
+      <label for="aiwModel">Model (optional — defaults apply)</label>
+      <input id="aiwModel" type="text" placeholder="e.g. gpt-4o-mini or claude-sonnet-4-20250514">
+    </div>
+    <div class="aiw-field">
+      <label for="aiwKey">API Key</label>
+      <input id="aiwKey" type="password" placeholder="sk-..." autocomplete="off">
+    </div>
+    <div class="aiw-row">
+      <button class="aiw-btn" type="button" id="aiwClear">Clear</button>
+      <button class="aiw-btn" type="button" id="aiwClose">Close</button>
+      <button class="aiw-btn primary" type="button" id="aiwSave">Save</button>
+    </div>
+    <div class="aiw-note">Your key never leaves this device except in direct calls to the selected AI provider.</div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="agent-window" id="agentWindow" data-agent="sales">
     <div class="modal-bar">
@@ -538,6 +600,16 @@
           <button class="generate" type="button" id="generateOutput">Build response</button>
         </div>
         <div class="output" id="output"><div class="empty">Your structured response will appear here.</div></div>
+        <div class="aiw-chat" aria-label="Live AI chat">
+          <h3>Live AI Chat</h3>
+          <div class="aiw-log" id="aiwLog"><div class="aiw-msg ai">Chat is ready once you add your API key in AI Chat Settings. Ask me anything in my specialty.</div></div>
+          <div class="aiw-inputrow">
+            <input id="aiwInput" type="text" placeholder="Message this specialist..." aria-label="Message this specialist">
+            <button class="aiw-btn primary" type="button" id="aiwSend">Send</button>
+          </div>
+          <div class="aiw-status" id="aiwStatus"></div>
+        </div>
+
       </section>
     </div>
   </div>
@@ -964,5 +1036,138 @@
   });
 })();
 </script>
+
+
+<script>
+(function(){
+  "use strict";
+  var SYS = {
+    sales: "You are a senior sales specialist for a small service business (moving, gutter, handyman work). You qualify leads, draft follow-ups, prepare calls, and handle objections. Be direct, practical, and specific. Never invent prices or promises.",
+    marketing: "You are a marketing and lead-generation specialist for a small local service business. You build campaigns, ideal customer profiles, outreach sequences, and content plans. Be concrete and budget-aware.",
+    accountant: "You are a pragmatic small-business accountant. You advise on pricing, margins, cash flow, and tax readiness. You are not a CPA; flag when a licensed professional is needed.",
+    bookkeeping: "You are a meticulous bookkeeping assistant. You help log income and expenses, categorize transactions, and keep the books clean and reconcilable.",
+    dispatch: "You are an automated inbound AI dispatch specialist for a high-tech service business. You design instant-response intake flows, smart routing rules, job dispatch packets, acknowledgment tracking, and real-time status updates. You replace manual phone-tag with automation while keeping a human override."
+  };
+  var DEFAULT_MODEL = { openai: "gpt-4o-mini", anthropic: "claude-sonnet-4-20250514" };
+  function cfg(){
+    return {
+      provider: localStorage.getItem("aiw_provider") || "openai",
+      model: localStorage.getItem("aiw_model") || "",
+      key: localStorage.getItem("aiw_key") || ""
+    };
+  }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function $(id){ return document.getElementById(id); }
+  function agentKey(){
+    var w = $("agentWindow");
+    return w ? (w.getAttribute("data-agent") || "sales") : "sales";
+  }
+  function histKey(){ return "aiw_hist_" + agentKey(); }
+  function loadHist(){ try { return JSON.parse(localStorage.getItem(histKey()) || "[]"); } catch(e){ return []; } }
+  function saveHist(h){ try { localStorage.setItem(histKey(), JSON.stringify(h.slice(-30))); } catch(e){} }
+  function renderLog(){
+    var log = $("aiwLog"); if(!log) return;
+    var h = loadHist(); log.innerHTML = "";
+    if(!h.length){
+      log.innerHTML = '<div class="aiw-msg ai">Chat is ready once you add your API key in AI Chat Settings. Ask me anything in my specialty.</div>';
+      return;
+    }
+    h.forEach(function(m){
+      var d = document.createElement("div");
+      d.className = "aiw-msg " + (m.role === "user" ? "user" : "ai");
+      d.textContent = m.text; log.appendChild(d);
+    });
+    log.scrollTop = log.scrollHeight;
+  }
+  function setStatus(t){ var s = $("aiwStatus"); if(s) s.textContent = t || ""; }
+  function addMsg(role, text){
+    var h = loadHist(); h.push({role: role, text: text}); saveHist(h); renderLog();
+  }
+  async function callOpenAI(c, messages){
+    var r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + c.key },
+      body: JSON.stringify({ model: c.model || DEFAULT_MODEL.openai, messages: messages })
+    });
+    if(!r.ok){ var t = await r.text(); throw new Error("OpenAI error " + r.status + ": " + t.slice(0,200)); }
+    var j = await r.json();
+    return j.choices[0].message.content;
+  }
+  async function callAnthropic(c, system, messages){
+    var r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": c.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({ model: c.model || DEFAULT_MODEL.anthropic, max_tokens: 1024, system: system, messages: messages })
+    });
+    if(!r.ok){ var t = await r.text(); throw new Error("Anthropic error " + r.status + ": " + t.slice(0,200)); }
+    var j = await r.json();
+    return j.content.map(function(b){ return b.text || ""; }).join("");
+  }
+  async function send(){
+    var input = $("aiwInput"); var text = input.value.trim();
+    if(!text) return;
+    var c = cfg();
+    if(!c.key){ setStatus("Add your API key in AI Chat Settings first."); return; }
+    input.value = "";
+    addMsg("user", text);
+    var log = $("aiwLog");
+    var tp = document.createElement("div"); tp.className = "aiw-msg ai typing"; tp.textContent = "Thinking...";
+    log.appendChild(tp); log.scrollTop = log.scrollHeight;
+    var btn = $("aiwSend"); btn.disabled = true; setStatus("");
+    try {
+      var key = agentKey();
+      var system = SYS[key] || SYS.sales;
+      var h = loadHist().map(function(m){ return { role: m.role === "user" ? "user" : "assistant", text: m.text }; });
+      var reply;
+      if(c.provider === "anthropic"){
+        var msgs = h.map(function(m){ return { role: m.role, content: m.text }; });
+        reply = await callAnthropic(c, system, msgs);
+      } else {
+        var msgs2 = [{ role: "system", content: system }].concat(h.map(function(m){ return { role: m.role, content: m.text }; }));
+        reply = await callOpenAI(c, msgs2);
+      }
+      tp.remove();
+      addMsg("assistant", reply);
+    } catch(e){
+      tp.remove();
+      var d = document.createElement("div"); d.className = "aiw-msg err";
+      d.textContent = "Request failed: " + e.message;
+      log.appendChild(d); log.scrollTop = log.scrollHeight;
+    }
+    btn.disabled = false;
+  }
+  function openSettings(){
+    var c = cfg();
+    $("aiwProvider").value = c.provider; $("aiwModel").value = c.model; $("aiwKey").value = c.key;
+    $("aiwDialog").classList.add("open");
+  }
+  document.addEventListener("click", function(e){
+    if(e.target && e.target.id === "aiwSettingsBtn") openSettings();
+    if(e.target && e.target.id === "aiwClose") $("aiwDialog").classList.remove("open");
+    if(e.target && e.target.id === "aiwDialog") $("aiwDialog").classList.remove("open");
+    if(e.target && e.target.id === "aiwSave"){
+      localStorage.setItem("aiw_provider", $("aiwProvider").value);
+      localStorage.setItem("aiw_model", $("aiwModel").value.trim());
+      localStorage.setItem("aiw_key", $("aiwKey").value.trim());
+      $("aiwDialog").classList.remove("open"); setStatus("Settings saved.");
+    }
+    if(e.target && e.target.id === "aiwClear"){
+      ["aiw_provider","aiw_model","aiw_key"].forEach(function(k){ localStorage.removeItem(k); });
+      $("aiwProvider").value = "openai"; $("aiwModel").value = ""; $("aiwKey").value = "";
+      setStatus("Cleared.");
+    }
+    if(e.target && e.target.id === "aiwSend") send();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.target && e.target.id === "aiwInput" && e.key === "Enter"){ e.preventDefault(); send(); }
+  });
+  // re-render chat history whenever a different agent workspace opens
+  var mo = new MutationObserver(function(){ renderLog(); });
+  var w0 = document.getElementById("agentWindow");
+  if(w0) mo.observe(w0, { attributes: true, attributeFilter: ["data-agent"] });
+  renderLog();
+})();
+</script>
+
 </body>
 </html>
