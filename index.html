@@ -405,6 +405,9 @@
 .demo-paywall { text-align: center; padding: 20px 8px 8px; }
 .demo-paywall h3 { margin: 0 0 8px; font-size: 1.25rem; }
 .demo-paywall p { opacity: .85; font-size: .95rem; line-height: 1.55; max-width: 520px; margin: 0 auto 14px; }
+.demo-chips { display: flex; gap: .45rem; flex-wrap: wrap; justify-content: center; margin: 0 0 14px; }
+.demo-chips button { padding: .42rem .8rem; border-radius: 999px; border: 1px dashed rgba(255,255,255,.3); background: transparent; color: inherit; cursor: pointer; font-size: .78rem; opacity: .9; }
+.demo-chips button:hover { border-style: solid; border-color: #4f7cff; color: #fff; }
 </style>
 </head>
 <body>
@@ -439,6 +442,7 @@
         <button type="button" data-demo-agent="accountant">Accountant</button>
         <button type="button" data-demo-agent="bookkeeping">Bookkeeping</button>
       </div>
+      <div class="demo-chips" id="demoChips" aria-label="Try an example question"></div>
       <div class="demo-box">
         <div class="aiw-log" id="demoLog"><div class="aiw-msg ai">Hello, I'm the <b>Sales Agent</b> demo. Ask me anything &mdash; for example: &ldquo;How do I follow up on a quote from 3 days ago?&rdquo;</div></div>
         <div class="aiw-inputrow" id="demoInputRow">
@@ -735,7 +739,13 @@
         { id: "qualify", label: "Qualify a lead", placeholder: "Example: A property manager asked about monthly maintenance. Budget unknown; they manage 12 buildings." },
         { id: "followup", label: "Draft a follow-up", placeholder: "Example: Prospect received a quote three days ago and has not replied. Keep it friendly and direct." },
         { id: "call", label: "Prepare a sales call", placeholder: "Example: 20-minute discovery call with a local contractor who wants more booked estimates." },
-        { id: "objection", label: "Handle an objection", placeholder: "Example: The prospect says the price is higher than another quote." }
+        { id: "objection", label: "Handle an objection", placeholder: "Example: The prospect says the price is higher than another quote." },
+        { id: "proposal", label: "Write a proposal", placeholder: "Example: Formal quote for a 3-bedroom move with full packing service." },
+        { id: "winback", label: "Win back cold leads", placeholder: "Example: 20 old quotes never closed — bring them back this month." },
+        { id: "discovery", label: "Plan discovery questions", placeholder: "Example: First call with a property manager about recurring maintenance work." },
+        { id: "close", label: "Close the deal", placeholder: "Example: Prospect is choosing between us and a cheaper competitor." },
+        { id: "referral", label: "Ask for referrals", placeholder: "Example: Happy customer just paid — turn them into your next 3 leads." },
+        { id: "upsell", label: "Upsell a customer", placeholder: "Example: Gutter cleaning customer who also needs downspout guards." }
       ]
     },
     marketing: {
@@ -747,7 +757,13 @@
         { id: "campaign", label: "Create a campaign brief", placeholder: "Example: Promote a $500 setup + $300/month AI receptionist to local service businesses." },
         { id: "icp", label: "Build an ideal prospect profile", placeholder: "Example: Luzerne County home-service businesses that miss calls after hours." },
         { id: "outreach", label: "Write an outreach sequence", placeholder: "Example: Cold outreach to roofers offering a short personalized video audit." },
-        { id: "content", label: "Plan one week of content", placeholder: "Example: Educational Facebook posts for owners who lose leads from missed calls." }
+        { id: "content", label: "Plan one week of content", placeholder: "Example: Educational Facebook posts for owners who lose leads from missed calls." },
+        { id: "gbp", label: "Optimize Google Business", placeholder: "Example: Rank for 'movers near me' in Luzerne County." },
+        { id: "referral", label: "Build a referral program", placeholder: "Example: Reward customers who send new booked jobs." },
+        { id: "adcopy", label: "Write ad copy", placeholder: "Example: Facebook ad for gutter cleaning before winter." },
+        { id: "email", label: "Write a win-back email", placeholder: "Example: Re-engage quotes from last season that went cold." },
+        { id: "reviews", label: "Get more reviews", placeholder: "Example: Turn finished jobs into 5-star Google reviews." },
+        { id: "offer", label: "Craft an irresistible offer", placeholder: "Example: Limited-time bundle for spring gutter and downspout work." }
       ]
     },
     dispatch: {
@@ -760,7 +776,12 @@
         { id: "response", label: "Create an instant response", placeholder: "Example: A customer texts about a leaking water heater. Acknowledge immediately, gather safety details, and set the next update expectation." },
         { id: "routing", label: "Design smart routing", placeholder: "Example: Route jobs by service type, technician skill, territory, urgency, availability, and current workload, with a fallback when nobody accepts." },
         { id: "dispatch", label: "Build an intelligent dispatch", placeholder: "Example: Assign a same-day job, package the customer brief, confirm the technician, notify the customer, and escalate if acknowledgment is late." },
-        { id: "status", label: "Map real-time status", placeholder: "Example: Track new → qualified → assigned → acknowledged → en route → on site → completed, with customer updates and SLA alerts." }
+        { id: "status", label: "Map real-time status", placeholder: "Example: Track new → qualified → assigned → acknowledged → en route → on site → completed, with customer updates and SLA alerts." },
+        { id: "afterhours", label: "Automate after-hours", placeholder: "Example: Calls after 6 PM get instant intake; urgent jobs page the on-call tech." },
+        { id: "eta", label: "Send live ETAs", placeholder: "Example: Customer gets a text when the tech is 30 minutes away." },
+        { id: "exceptions", label: "Handle exceptions", placeholder: "Example: Tech runs late — auto-notify the customer and re-route the next job." },
+        { id: "capacity", label: "Plan crew capacity", placeholder: "Example: Two crews, 6 jobs a day — spot overload before it happens." },
+        { id: "missed", label: "Stop missed calls", placeholder: "Example: Every missed call gets an instant text-back with a booking link." }
       ]
     },
     accountant: {
@@ -772,7 +793,13 @@
         { id: "budget", label: "Build a budget scenario", placeholder: "Example: Monthly revenue target $12,000; software $450; ads $1,000; contractor cost 30%." },
         { id: "cash", label: "Review cash flow", placeholder: "Example: Receivables arrive in 30 days, but payroll and software are due this week." },
         { id: "margin", label: "Check job margin", placeholder: "Example: Quote $2,400; labor 32 hours at $28/hour; materials $460; travel $120." },
-        { id: "cpa", label: "Prepare for a CPA meeting", placeholder: "Example: New service business, first profitable quarter, considering an equipment purchase." }
+        { id: "cpa", label: "Prepare for a CPA meeting", placeholder: "Example: New service business, first profitable quarter, considering an equipment purchase." },
+        { id: "pricing", label: "Price for profit", placeholder: "Example: Two-person crew costs $55/hour — what should the customer rate be?" },
+        { id: "breakeven", label: "Find break-even", placeholder: "Example: $4,200 fixed costs monthly — how many jobs to break even?" },
+        { id: "tax", label: "Plan for taxes", placeholder: "Example: $60k profit expected — how much to set aside quarterly?" },
+        { id: "debt", label: "Kill business debt", placeholder: "Example: $8,000 equipment loan at 9% — pay it down fastest." },
+        { id: "payroll", label: "Plan payroll", placeholder: "Example: Adding a part-time helper at $18/hour, 20 hours a week." },
+        { id: "reports", label: "Read your numbers", placeholder: "Example: Explain P&L, balance sheet, and cash flow in plain English." }
       ]
     },
     bookkeeping: {
@@ -784,7 +811,13 @@
         { id: "classify", label: "Classify transactions", placeholder: "Example: Fuel, Facebook ads, monthly CRM, customer refund, tool rental, owner transfer." },
         { id: "reconcile", label: "Build a reconciliation plan", placeholder: "Example: Bank balance differs from the books and two deposits are still pending." },
         { id: "close", label: "Run month-end close", placeholder: "Example: Close September for a service business with card sales and subcontractors." },
-        { id: "documents", label: "Create a document chase list", placeholder: "Example: Missing receipts, one vendor W-9, two invoices, and a loan statement." }
+        { id: "documents", label: "Create a document chase list", placeholder: "Example: Missing receipts, one vendor W-9, two invoices, and a loan statement." },
+        { id: "receipts", label: "Tame receipts", placeholder: "Example: Glovebox full of fuel and supply receipts every month." },
+        { id: "invoices", label: "Chase unpaid invoices", placeholder: "Example: Three invoices 30+ days overdue — get paid." },
+        { id: "payroll", label: "Log payroll simply", placeholder: "Example: Weekly pay for two crew members plus one subcontractor." },
+        { id: "mileage", label: "Track mileage", placeholder: "Example: 400 business miles a month across two trucks." },
+        { id: "separate", label: "Separate finances", placeholder: "Example: Personal and business spending mixed on one card." },
+        { id: "audit", label: "Stay audit-ready", placeholder: "Example: Keep books clean enough to hand a CPA anytime." }
       ]
     }
   };
@@ -1304,6 +1337,21 @@
     accountant: "You are a pragmatic small-business accountant (not a CPA). Give a short, practical demo answer (under 120 words).",
     bookkeeping: "You are a meticulous bookkeeping assistant. Give a short, practical demo answer (under 120 words)."
   };
+  var DEMO_CHIPS = {
+    sales: ["How do I follow up on a quote from 3 days ago?","A prospect says my price is too high \u2014 what do I say?","Write a cold outreach message for a local roofer","Give me 5 discovery call questions","How do I ask for the sale without being pushy?","How do I win back old leads that went cold?"],
+    marketing: ["Create a Facebook ad for a moving company","How do I get more Google reviews?","Write a week of social posts for a handyman","What is a good lead magnet for gutter services?","Plan a $20/day local ad campaign","How do I re-engage old leads?"],
+    dispatch: ["Design an after-hours call answering flow","How do I route urgent vs routine jobs?","Write an instant text-back for missed calls","Create a dispatch priority system","How do I track job status automatically?","Build a customer ETA notification sequence"],
+    accountant: ["How should I price a moving job profitably?","What is my monthly break-even?","How do I handle cash flow in slow months?","How much should I set aside for taxes?","Should I raise my prices this year?","Crew costs $55/hour \u2014 what rate do I charge?"],
+    bookkeeping: ["How do I categorize fuel and tolls?","Set up a simple weekly bookkeeping routine","How do I chase unpaid invoices?","What is the easiest way to log receipts?","How do I track business mileage?","How do I separate business and personal spending?"]
+  };
+  function renderChips(){
+    var box=$("demoChips"); if(!box) return; box.innerHTML="";
+    DEMO_CHIPS[agent()].forEach(function(q){
+      var b=document.createElement("button"); b.type="button"; b.textContent=q;
+      b.addEventListener("click", function(){ var inp=$("demoInput"); if(inp){ inp.value=q; } demoSend(); });
+      box.appendChild(b);
+    });
+  }
   var DEMO_NAMES = { sales:"Sales Agent", marketing:"Marketing + Lead Gen", dispatch:"Automated Inbound AI and Dispatch Specialist", accountant:"Accountant Agent", bookkeeping:"Bookkeeping Agent" };
   var LIMIT = 3;
   function $(id){ return document.getElementById(id); }
@@ -1351,6 +1399,7 @@
         var log=$("demoLog"); if(log) log.innerHTML="";
         addMsg("ai", "Hello, I'm the <b>"+esc(DEMO_NAMES[agent()])+"</b> demo. Ask me anything in my specialty.");
         var inp=$("demoInput"); if(inp) inp.placeholder="Ask the "+DEMO_NAMES[agent()]+" anything...";
+        renderChips();
         if(count()>=LIMIT) showPaywall();
         return;
       }
@@ -1361,6 +1410,7 @@
   document.addEventListener("keydown", function(e){
     if(e.target && e.target.id==="demoInput" && e.key==="Enter"){ e.preventDefault(); demoSend(); }
   });
+  renderChips();
   if(count()>=LIMIT) showPaywall();
 })();
 </script>
