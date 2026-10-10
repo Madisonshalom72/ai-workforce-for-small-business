@@ -417,26 +417,102 @@
 .demo-chips button { padding: .42rem .8rem; border-radius: 999px; border: 1px dashed rgba(255,255,255,.3); background: transparent; color: inherit; cursor: pointer; font-size: .78rem; opacity: .9; }
 .demo-chips button:hover { border-style: solid; border-color: #4f7cff; color: #fff; }
 </style>
+
+<style>
+html { scroll-behavior: smooth; }
+.hero.hitech { background: #070b12; border-bottom: 0; color: #eef3f8; overflow: hidden; padding: 76px 0 64px; position: relative; }
+.hero.hitech::after { display: none; }
+.hero.hitech .aurora span { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; animation: htdrift 18s ease-in-out infinite alternate; }
+.hero.hitech .aurora .a1 { width: 480px; height: 480px; background: #2b6bff; top: -160px; left: -120px; opacity: .5; }
+.hero.hitech .aurora .a2 { width: 420px; height: 420px; background: #00d4ff; bottom: -180px; right: -100px; opacity: .32; animation-delay: -6s; }
+.hero.hitech .aurora .a3 { width: 300px; height: 300px; background: #f0642f; top: 18%; left: 55%; opacity: .26; animation-delay: -12s; }
+@keyframes htdrift { from { transform: translate(0,0) scale(1); } to { transform: translate(60px, 42px) scale(1.15); } }
+.hero.hitech .gridfloor { position: absolute; left: 0; right: 0; bottom: -40px; height: 240px; pointer-events: none;
+  background-image: linear-gradient(rgba(120,180,255,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(120,180,255,.13) 1px, transparent 1px);
+  background-size: 44px 44px; transform: perspective(600px) rotateX(58deg); transform-origin: bottom;
+  -webkit-mask-image: linear-gradient(to top, black 25%, transparent 92%); mask-image: linear-gradient(to top, black 25%, transparent 92%); }
+.hero.hitech .hero-grid { position: relative; z-index: 1; align-items: center; }
+.hero.hitech h1 { color: #fff; }
+.hero.hitech .grad { background: linear-gradient(90deg, #5eb1ff, #00e5cc, #5eb1ff); background-size: 220% auto;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: htshine 6s linear infinite; }
+@keyframes htshine { to { background-position: 220% center; } }
+.hero.hitech .lede { color: rgba(238,243,248,.72); }
+.hud { display: inline-flex; align-items: center; gap: 10px; font-family: "IBM Plex Mono", monospace; font-size: 12px;
+  letter-spacing: .1em; color: #7df9ff; border: 1px solid rgba(125,249,255,.32); background: rgba(125,249,255,.06);
+  padding: 8px 16px; border-radius: 999px; margin-bottom: 22px; }
+.hud .pulse { width: 8px; height: 8px; border-radius: 50%; background: #3dffa2; box-shadow: 0 0 0 0 rgba(61,255,162,.6); animation: htpulse 2s infinite; }
+@keyframes htpulse { 0% { box-shadow: 0 0 0 0 rgba(61,255,162,.55); } 70% { box-shadow: 0 0 0 9px rgba(61,255,162,0); } 100% { box-shadow: 0 0 0 0 rgba(61,255,162,0); } }
+.hud .hud-sep { opacity: .4; } .hud .hud-sub { color: rgba(238,243,248,.65); letter-spacing: .04em; }
+.cta-row { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+.btn-glow { display: inline-block; background: linear-gradient(135deg, #2b6bff, #00c2ff); color: #fff; font-weight: 800;
+  padding: 15px 28px; border-radius: 12px; text-decoration: none; font-size: 16px; border: 0; cursor: pointer;
+  box-shadow: 0 0 26px rgba(43,107,255,.55), inset 0 1px 0 rgba(255,255,255,.28); transition: transform .15s ease, box-shadow .15s ease; }
+.btn-glow:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(43,107,255,.8), inset 0 1px 0 rgba(255,255,255,.28); }
+.btn-ghost { background: rgba(255,255,255,.04); color: #fff; border: 1px solid rgba(255,255,255,.35); padding: 15px 28px;
+  border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.btn-ghost:hover { background: rgba(255,255,255,.1); border-color: #fff; }
+.cap-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
+.cap-chips span { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .12em; color: rgba(255,255,255,.6);
+  border: 1px solid rgba(255,255,255,.16); padding: 7px 13px; border-radius: 999px; background: rgba(255,255,255,.03); }
+.cmd-panel { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border-radius: 18px; padding: 26px; color: #fff; position: relative; z-index: 1; box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+.cmd-panel small { font-family: "IBM Plex Mono", monospace; letter-spacing: .16em; color: #7df9ff; font-size: 11px; }
+.cmd-stats { display: flex; gap: 26px; margin: 18px 0 20px; }
+.cmd-stats strong { display: block; font-size: 30px; line-height: 1; background: linear-gradient(180deg,#fff,#9fd8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cmd-stats span { font-size: 12px; opacity: .62; letter-spacing: .06em; }
+.cmd-q { display: block; font-size: 19px; margin: 0 0 6px; }
+.cmd-hint { display: block; opacity: .62; font-size: 13.5px; margin-bottom: 18px; }
+.cmd-panel #quickStart { width: 100%; background: linear-gradient(135deg, #f0642f, #ff9a3d); color: #fff; border: 0; padding: 14px;
+  border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 8px 26px rgba(240,100,47,.45); transition: transform .15s ease; }
+.cmd-panel #quickStart:hover { transform: translateY(-2px); }
+.hero.hitech .hero-main > * { animation: htrise .7s cubic-bezier(.2,.7,.2,1) both; }
+.hero.hitech .hero-main > *:nth-child(2) { animation-delay: .08s; }
+.hero.hitech .hero-main > *:nth-child(3) { animation-delay: .16s; }
+.hero.hitech .hero-main > *:nth-child(4) { animation-delay: .24s; }
+.hero.hitech .cmd-panel { animation: htrise .7s .3s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes htrise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px) {
+  .hero.hitech { padding: 54px 0 46px; }
+  .hero.hitech .hero-grid { grid-template-columns: 1fr; gap: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero.hitech .aurora span, .hero.hitech .grad, .hero.hitech .hero-main > *, .hero.hitech .cmd-panel, .hud .pulse { animation: none !important; }
+}
+</style>
 </head>
 <body>
 <div class="page">
-  <header class="hero">
+  <header class="hero hitech">
+    <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+    <div class="gridfloor" aria-hidden="true"></div>
     <div class="wrap hero-grid">
-      <div>
-        <div class="status"><span class="pulse"></span>5 specialist workspaces ready</div>
-        <h1>Put the right specialist on every business task.</h1>
-        <p>Open a workspace, choose a playbook, and turn a rough request into a clear next move for inbound operations, sales, growth, accounting, or the books.</p>
+      <div class="hero-main">
+        <div class="hud"><span class="pulse"></span><span>SYSTEM ONLINE</span><span class="hud-sep">&middot;</span><span class="hud-sub">5 specialist workspaces ready</span></div>
+        <h1>Your business, run by an <span class="grad">AI workforce</span>.</h1>
+        <p class="lede">Five specialists on call 24/7 &mdash; sales, marketing, dispatch, accounting, and bookkeeping. Chat with them, talk to them, and put them to work in seconds.</p>
+        <div class="cta-row">
+          <a class="btn-glow" href="#demo">Try the live demo</a>
+          <button class="btn-ghost" type="button" id="heroUnlock">Unlock &mdash; $99/mo</button>
+        </div>
+        <div class="cap-chips" aria-label="Capabilities">
+          <span>AI CHAT</span><span>VOICE</span><span>50 PLAYBOOKS</span><span>AUTO-DISPATCH</span><span>24/7</span>
+        </div>
       </div>
-      <aside class="brief-card" aria-label="Quick start">
-        <small>FAST START / 01</small>
-        <strong>What needs attention first?</strong>
-        <span>Start with a short brief. You can switch specialists at any time.</span>
-        <button type="button" id="quickStart">Open the Sales workspace →</button>
+      <aside class="cmd-panel" aria-label="Mission control">
+        <small>MISSION CONTROL</small>
+        <div class="cmd-stats">
+          <div><strong>5</strong><span>SPECIALISTS</span></div>
+          <div><strong>50</strong><span>PLAYBOOKS</span></div>
+          <div><strong>24/7</strong><span>ON CALL</span></div>
+        </div>
+        <strong class="cmd-q">What needs attention first?</strong>
+        <span class="cmd-hint">Start with a short brief. Switch specialists at any time.</span>
+        <button type="button" id="quickStart">Open the Sales workspace &rarr;</button>
       </aside>
     </div>
   </header>
 
-  <section class="demo-shell" aria-label="Live AI demo">
+  <section class="demo-shell" id="demo" aria-label="Live AI demo">
     <div class="wrap">
       <div class="demo-head">
         <span class="demo-kicker">LIVE DEMO &mdash; TRY IT FREE</span>
@@ -1113,6 +1189,8 @@
     button.addEventListener("click", function () { openAgent(button.getAttribute("data-open")); });
   });
   document.getElementById("quickStart").addEventListener("click", function () { openAgent("sales"); });
+  var hu = document.getElementById("heroUnlock");
+  if(hu) hu.addEventListener("click", function(){ window.open("https://cash.app/$Capital7logistics","_blank","noopener"); });
   document.getElementById("closeModal").addEventListener("click", closeModal);
   document.getElementById("generateOutput").addEventListener("click", renderResult);
   document.getElementById("clearTask").addEventListener("click", function () { taskInput.value = ""; resetOutput(); taskInput.focus(); });
