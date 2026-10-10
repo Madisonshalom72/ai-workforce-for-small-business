@@ -269,6 +269,7 @@
     .pricing-head p { max-width: 650px; margin: 10px 0 0; color: var(--muted); font-size: 14px; }
     .pricing-close { flex: 0 0 auto; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); cursor: pointer; font-size: 21px; line-height: 1; }
     .pricing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 18px 18px 12px; align-items: stretch; }
+    .pricing-grid.single { grid-template-columns: minmax(300px, 440px); justify-content: center; }
     .price-card { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 22px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
     .price-card.featured { background: var(--surface); border-color: var(--orange); box-shadow: 0 18px 42px color-mix(in srgb, var(--orange), transparent 88%); }
     .popular { align-self: flex-start; margin: -22px -22px 18px; padding: 7px 12px; border-radius: 9px 9px 0 0; background: var(--orange); color: #fff; font: 600 10px/1.2 "IBM Plex Mono", monospace; letter-spacing: .08em; text-align: center; }
@@ -622,54 +623,29 @@
       <div>
         <span class="pricing-kicker">RESPONSE COMPLETE / NEXT STEP</span>
         <h2 id="pricingTitle">Put your AI workforce to work.</h2>
-        <p>Choose the operating level that fits your business now. Professional is the strongest value for a growing team that wants every specialist and connected handoffs.</p>
+        <p>One simple plan. Every specialist, connected handoffs, and priority support — pay securely with Cash App.</p>
       </div>
       <button class="pricing-close" type="button" id="closePricing" aria-label="Close pricing">×</button>
     </header>
-    <div class="pricing-grid">
-      <article class="price-card">
-        <h3 class="plan-name">Starter</h3>
-        <p class="plan-for">For a solo owner automating the first repeatable workflows.</p>
-        <div class="price"><strong>$49</strong><span>/ month</span></div>
-        <ul class="plan-features">
-          <li>2 specialist workspaces</li>
-          <li>500 guided sessions each month</li>
-          <li>Core business playbooks</li>
-          <li>Copy and file exports</li>
-          <li>Standard email support</li>
-        </ul>
-        <button class="plan-cta" type="button" data-plan="Starter" data-price="$49/month">Choose Starter</button>
-      </article>
+    <div class="pricing-grid single">
       <article class="price-card featured">
-        <span class="popular">MOST POPULAR</span>
+        <span class="popular">ONE SIMPLE PLAN</span>
         <h3 class="plan-name">Professional</h3>
         <p class="plan-for">For small teams ready to connect revenue, operations, and finance.</p>
         <div class="price"><strong>$99</strong><span>/ month</span></div>
         <ul class="plan-features">
           <li>All 5 specialist workspaces</li>
+          <li>Live AI chat with every specialist</li>
           <li>2,500 guided sessions each month</li>
           <li>Connected agent handoffs</li>
           <li>Custom playbooks and exports</li>
           <li>Priority email support</li>
         </ul>
-        <button class="plan-cta" type="button" data-plan="Professional" data-price="$99/month">Choose Professional</button>
-      </article>
-      <article class="price-card">
-        <h3 class="plan-name">Scale</h3>
-        <p class="plan-for">For multi-team operations with higher volume and dispatch needs.</p>
-        <div class="price"><strong>$249</strong><span>/ month</span></div>
-        <ul class="plan-features">
-          <li>All specialists with 10,000 sessions</li>
-          <li>Multi-location workflow planning</li>
-          <li>Advanced routing and SLA playbooks</li>
-          <li>Team roles and shared exports</li>
-          <li>Priority onboarding support</li>
-        </ul>
-        <button class="plan-cta" type="button" data-plan="Scale" data-price="$249/month">Choose Scale</button>
+        <button class="plan-cta" type="button" id="cashAppPay">Pay $99/month with Cash App</button>
       </article>
     </div>
     <footer class="pricing-foot">
-      <span>Choosing a package downloads a rollout brief. No charge is made on this page.</span>
+      <span>Paying opens Cash App — send $99 to $Capital7logistics for your monthly plan — and downloads your rollout brief.</span>
       <button type="button" id="keepWorking">Not now — keep working</button>
     </footer>
   </section>
@@ -1019,9 +995,15 @@
   document.getElementById("clearTask").addEventListener("click", function () { taskInput.value = ""; resetOutput(); taskInput.focus(); });
   document.getElementById("closePricing").addEventListener("click", closePricing);
   document.getElementById("keepWorking").addEventListener("click", closePricing);
-  Array.prototype.forEach.call(document.querySelectorAll(".plan-cta"), function (button) {
-    button.addEventListener("click", function () { choosePlan(button); });
-  });
+  var cashBtn = document.getElementById("cashAppPay");
+  if (cashBtn) {
+    cashBtn.addEventListener("click", function () {
+      choosePlan(cashBtn);
+      window.open('https://cash.app/$Capital7logistics', "_blank", "noopener");
+    });
+    cashBtn.setAttribute("data-plan", "Professional");
+    cashBtn.setAttribute("data-price", "$99/month");
+  }
   modal.addEventListener("click", function (event) { if (event.target === modal) closeModal(); });
   pricingModal.addEventListener("click", function (event) { if (event.target === pricingModal) closePricing(); });
   document.addEventListener("keydown", function (event) {
