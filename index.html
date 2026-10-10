@@ -367,6 +367,29 @@
 .aiw-inputrow input{flex:1;padding:.6rem .7rem;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#1a2436;color:#fff;font-size:.9rem}
 .aiw-status{font-size:.78rem;opacity:.65;margin-top:6px;min-height:1.1em}
 </style>
+
+<style>
+@keyframes aiw-tile-in { from { opacity: 0; transform: translateY(30px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.agent-grid .agent-tile.in-view { animation: aiw-tile-in .8s cubic-bezier(.16,.8,.26,1) both; }
+.agent-grid .agent-tile.in-view:nth-child(1) { animation-delay: .05s; }
+.agent-grid .agent-tile.in-view:nth-child(2) { animation-delay: .16s; }
+.agent-grid .agent-tile.in-view:nth-child(3) { animation-delay: .27s; }
+.agent-grid .agent-tile.in-view:nth-child(4) { animation-delay: .38s; }
+.agent-grid .agent-tile.in-view:nth-child(5) { animation-delay: .49s; }
+@keyframes aiw-portrait-glow { 0%,100% { filter: drop-shadow(0 0 0 rgba(79,124,255,0)); } 50% { filter: drop-shadow(0 0 16px rgba(79,124,255,.5)); } }
+.agent-tile.in-view .agent-portrait { animation: aiw-portrait-glow 4.5s ease-in-out infinite; }
+@keyframes aiw-pulse-dot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.8); } }
+.agent-tile.in-view .window-state::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #35e08a; margin-right: 6px; vertical-align: 1px; animation: aiw-pulse-dot 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .agent-grid .agent-tile.in-view { animation: none; }
+  .agent-tile.in-view .agent-portrait { animation: none; }
+  .agent-tile.in-view .window-state::before { animation: none; }
+}
+.aiw-chat-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin: 0 0 8px; }
+.aiw-chat-head h3 { margin: 0; }
+.aiw-mini { font-size: .78rem; padding: .4rem .7rem; }
+#aiwMic.rec-on { background: #c0392b; border-color: #c0392b; color: #fff; }
+</style>
 </head>
 <body>
 <div class="page">
@@ -603,10 +626,11 @@
         </div>
         <div class="output" id="output"><div class="empty">Your structured response will appear here.</div></div>
         <div class="aiw-chat" aria-label="Live AI chat">
-          <h3>Live AI Chat</h3>
+          <div class="aiw-chat-head"><h3>Live AI Chat</h3><button class="aiw-btn aiw-mini" type="button" id="aiwVoice" aria-pressed="false">🔇 Voice replies off</button></div>
           <div class="aiw-log" id="aiwLog"><div class="aiw-msg ai">Chat is ready once you add your API key in AI Chat Settings. Ask me anything in my specialty.</div></div>
           <div class="aiw-inputrow">
-            <input id="aiwInput" type="text" placeholder="Message this specialist..." aria-label="Message this specialist">
+            <input id="aiwInput" type="text" placeholder="Message this specialist... or tap the mic to speak" aria-label="Message this specialist">
+            <button class="aiw-btn" type="button" id="aiwMic" aria-label="Speak your message">🎤</button>
             <button class="aiw-btn primary" type="button" id="aiwSend">Send</button>
           </div>
           <div class="aiw-status" id="aiwStatus"></div>
@@ -1103,6 +1127,7 @@
     var c = cfg();
     if(!c.key){ setStatus("Add your API key in AI Chat Settings first."); return; }
     input.value = "";
+    try { if("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch(e0){}
     addMsg("user", text);
     var log = $("aiwLog");
     var tp = document.createElement("div"); tp.className = "aiw-msg ai typing"; tp.textContent = "Thinking...";
@@ -1125,6 +1150,7 @@
       }
       tp.remove();
       addMsg("assistant", reply);
+      aiwSpeak(reply);
     } catch(e){
       tp.remove();
       var d = document.createElement("div"); d.className = "aiw-msg err";
@@ -1154,6 +1180,8 @@
       setStatus("Cleared.");
     }
     if(e.target && e.target.id === "aiwSend") send();
+    if(e.target && e.target.id === "aiwVoice") aiwToggleVoice();
+    if(e.target && e.target.id === "aiwMic") aiwToggleMic();
   });
   document.addEventListener("keydown", function(e){
     if(e.target && e.target.id === "aiwInput" && e.key === "Enter"){ e.preventDefault(); send(); }
@@ -1162,6 +1190,57 @@
   var mo = new MutationObserver(function(){ renderLog(); });
   var w0 = document.getElementById("agentWindow");
   if(w0) mo.observe(w0, { attributes: true, attributeFilter: ["data-agent"] });
+  /* ---- voice in / out ---- */
+  var aiwVoiceOn = false;
+  try { aiwVoiceOn = localStorage.getItem("aiw_voice") === "1"; } catch(e){}
+  function aiwSpeak(text){
+    if(!aiwVoiceOn) return;
+    try {
+      if(!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(String(text).slice(0, 600));
+      window.speechSynthesis.speak(u);
+    } catch(e){}
+  }
+  function aiwPaintVoice(){
+    var b = $("aiwVoice"); if(!b) return;
+    b.setAttribute("aria-pressed", aiwVoiceOn ? "true" : "false");
+    b.textContent = aiwVoiceOn ? "\u{1F50A} Voice replies on" : "\u{1F507} Voice replies off";
+  }
+  function aiwToggleVoice(){
+    aiwVoiceOn = !aiwVoiceOn;
+    try { localStorage.setItem("aiw_voice", aiwVoiceOn ? "1" : "0"); } catch(e){}
+    if(!aiwVoiceOn){ try { window.speechSynthesis.cancel(); } catch(e){} }
+    aiwPaintVoice();
+    setStatus(aiwVoiceOn ? "Voice replies on — I'll speak my answers." : "Voice replies off.");
+  }
+  var AiWRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  var aiwRec = null, aiwRecOn = false;
+  function aiwPaintMic(){
+    var b = $("aiwMic"); if(!b) return;
+    b.style.display = AiWRec ? "" : "none";
+    b.textContent = aiwRecOn ? "\u23F9" : "\u{1F3A4}";
+    if(aiwRecOn){ b.classList.add("rec-on"); } else { b.classList.remove("rec-on"); }
+  }
+  function aiwToggleMic(){
+    if(!AiWRec){ setStatus("Voice input isn't supported in this browser — try Chrome."); return; }
+    if(aiwRecOn){ try { aiwRec.stop(); } catch(e){} return; }
+    try {
+      aiwRec = new AiWRec();
+      aiwRec.lang = "en-US"; aiwRec.interimResults = false; aiwRec.maxAlternatives = 1;
+      aiwRec.onresult = function(ev){
+        var t = ev.results[0][0].transcript;
+        var inp = $("aiwInput"); if(inp) inp.value = t;
+        setStatus('Heard: "' + t + '"');
+        send();
+      };
+      aiwRec.onerror = function(ev){ setStatus("Mic issue: " + (ev.error || "unknown")); };
+      aiwRec.onend = function(){ aiwRecOn = false; aiwPaintMic(); };
+      aiwRec.start(); aiwRecOn = true; aiwPaintMic();
+      setStatus("Listening… speak now.");
+    } catch(e){ setStatus("Mic not available."); }
+  }
+  aiwPaintVoice(); aiwPaintMic();
   renderLog();
 })();
 </script>
