@@ -405,6 +405,14 @@
 .demo-paywall { text-align: center; padding: 20px 8px 8px; }
 .demo-paywall h3 { margin: 0 0 8px; font-size: 1.25rem; }
 .demo-paywall p { opacity: .85; font-size: .95rem; line-height: 1.55; max-width: 520px; margin: 0 auto 14px; }
+.how-shell { padding: 30px 0 6px; }
+.how-shell h2 { text-align: center; margin: 0 0 18px; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+.how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 920px; margin: 0 auto; }
+.how-grid > div { border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 18px; background: rgba(255,255,255,.03); }
+.how-grid .n { display: inline-flex; width: 34px; height: 34px; border-radius: 50%; background: #4f7cff; color: #fff; font-weight: 800; align-items: center; justify-content: center; margin-bottom: 10px; }
+.how-grid h3 { margin: 0 0 6px; font-size: 1.02rem; }
+.how-grid p { margin: 0; opacity: .78; font-size: .88rem; line-height: 1.55; }
+@media (max-width: 720px){ .how-grid { grid-template-columns: 1fr; } }
 .demo-chips { display: flex; gap: .45rem; flex-wrap: wrap; justify-content: center; margin: 0 0 14px; }
 .demo-chips button { padding: .42rem .8rem; border-radius: 999px; border: 1px dashed rgba(255,255,255,.3); background: transparent; color: inherit; cursor: pointer; font-size: .78rem; opacity: .9; }
 .demo-chips button:hover { border-style: solid; border-color: #4f7cff; color: #fff; }
@@ -456,6 +464,17 @@
           <button class="aiw-btn primary" type="button" id="demoUnlock">Unlock with Cash App &mdash; $99/mo</button>
           <div class="aiw-note">Opens Cash App &mdash; send $99 to $Capital7logistics. After paying, you get full access details.</div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-shell" aria-label="How it works">
+    <div class="wrap">
+      <h2>From curious to fully staffed in 3 steps</h2>
+      <div class="how-grid">
+        <div><span class="n">1</span><h3>Try the live demo</h3><p>Pick a specialist above, ask anything, and get a real AI answer in seconds. Free &mdash; 3 messages, no signup.</p></div>
+        <div><span class="n">2</span><h3>Unlock your workforce</h3><p>One payment of $99/month activates all 5 specialists with unlimited chat and voice interaction.</p></div>
+        <div><span class="n">3</span><h3>Put them to work</h3><p>Qualify leads, write campaigns, price jobs, and dispatch work &mdash; your AI office never sleeps.</p></div>
       </div>
     </div>
   </section>
@@ -1156,7 +1175,7 @@
     var log = $("aiwLog"); if(!log) return;
     var h = loadHist(); log.innerHTML = "";
     if(!h.length){
-      log.innerHTML = '<div class="aiw-msg ai">Chat is ready once you add your API key in AI Chat Settings. Ask me anything in my specialty.</div>';
+      log.innerHTML = '<div class="aiw-msg ai">Ask me anything in my specialty — I answer instantly.</div>';
       return;
     }
     h.forEach(function(m){
@@ -1201,11 +1220,31 @@
     var j2 = await r.json();
     return j2.candidates[0].content.parts.map(function(p){ return p.text || ""; }).join("");
   }
+  async function backendChat(message, system, hist){
+    try{
+      var r = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message, system: system,
+          history: (hist || []).map(function(m){ return { role: m.role === "assistant" ? "ai" : "user", text: String(m.text || "").slice(0, 2000) }; }) })
+      });
+      if(!r.ok) return null;
+      var j = await r.json();
+      return (j && j.reply) ? String(j.reply) : null;
+    }catch(e){ return null; }
+  }
+  function needKey(){
+    var st = $("aiwStatus");
+    if(st){
+      st.innerHTML = esc("The built-in AI isn't connected yet — add a key in AI Chat Settings for unlimited chat.") + ' <button type="button" class="aiw-btn sm" id="aiwOpenSettings">Open AI Chat Settings</button>';
+      var ob = $("aiwOpenSettings");
+      if(ob) ob.addEventListener("click", function(){ openSettings(); });
+    }
+  }
   async function send(){
     var input = $("aiwInput"); var text = input.value.trim();
     if(!text) return;
     var c = cfg();
-    if(!c.key){ setStatus("Add your API key in AI Chat Settings first."); return; }
     input.value = "";
     try { if("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch(e0){}
     addMsg("user", text);
@@ -1218,24 +1257,32 @@
       var system = SYS[key] || SYS.sales;
       var h = loadHist().map(function(m){ return { role: m.role === "user" ? "user" : "assistant", text: m.text }; });
       var reply;
-      if(c.provider === "anthropic"){
-        var msgs = h.map(function(m){ return { role: m.role, content: m.text }; });
-        reply = await callAnthropic(c, system, msgs);
-      } else if(c.provider === "gemini"){
-        var msgs3 = h.map(function(m){ return { role: m.role === "user" ? "user" : "model", parts: [{ text: m.text }] }; });
-        reply = await callGemini(c, system, msgs3);
+      if(c.key){
+        if(c.provider === "anthropic"){
+          var msgs = h.map(function(m){ return { role: m.role, content: m.text }; });
+          reply = await callAnthropic(c, system, msgs);
+        } else if(c.provider === "gemini"){
+          var msgs3 = h.map(function(m){ return { role: m.role === "user" ? "user" : "model", parts: [{ text: m.text }] }; });
+          reply = await callGemini(c, system, msgs3);
+        } else {
+          var msgs2 = [{ role: "system", content: system }].concat(h.map(function(m){ return { role: m.role, content: m.text }; }));
+          reply = await callOpenAI(c, msgs2);
+        }
       } else {
-        var msgs2 = [{ role: "system", content: system }].concat(h.map(function(m){ return { role: m.role, content: m.text }; }));
-        reply = await callOpenAI(c, msgs2);
+        reply = await backendChat(text, system, h);
+        if(!reply) throw { noKey: true };
       }
       tp.remove();
       addMsg("assistant", reply);
       aiwSpeak(reply);
     } catch(e){
       tp.remove();
-      var d = document.createElement("div"); d.className = "aiw-msg err";
-      d.textContent = "Request failed: " + e.message;
-      log.appendChild(d); log.scrollTop = log.scrollHeight;
+      if(e && e.noKey){ needKey(); }
+      else {
+        var d = document.createElement("div"); d.className = "aiw-msg err";
+        d.textContent = "Request failed: " + e.message;
+        log.appendChild(d); log.scrollTop = log.scrollHeight;
+      }
     }
     btn.disabled = false;
   }
@@ -1362,6 +1409,32 @@
   function addMsg(cls, html){ var log=$("demoLog"); if(!log) return; var d=document.createElement("div"); d.className="aiw-msg "+cls; d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; }
   function status(t){ var s=$("demoStatus"); if(s) s.textContent=t||""; }
   function showPaywall(){ var p=$("demoPaywall"), r=$("demoInputRow"); if(p) p.hidden=false; if(r) r.style.display="none"; status(""); }
+  async function demoCall(text){
+    try{
+      var r0 = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, system: DEMO_SYS[agent()] })
+      });
+      if(r0.ok){ var j0 = await r0.json(); if(j0 && j0.reply) return String(j0.reply).slice(0,1200); }
+    }catch(e0){}
+    var sys = DEMO_SYS[agent()];
+    var urls = [
+      "https://text.pollinations.ai/"+encodeURIComponent(text)+"?system="+encodeURIComponent(sys)+"&model=openai",
+      "https://text.pollinations.ai/"+encodeURIComponent(text)+"?system="+encodeURIComponent(sys)
+    ];
+    var lastErr = null;
+    for(var i=0;i<urls.length;i++){
+      try{
+        var r = await fetch(urls[i]);
+        if(!r.ok){ lastErr = new Error("demo busy ("+r.status+")"); continue; }
+        var a = (await r.text()).trim();
+        if(!a){ lastErr = new Error("empty answer"); continue; }
+        return a.slice(0,1200);
+      }catch(e2){ lastErr = e2; }
+    }
+    throw lastErr || new Error("demo unavailable");
+  }
   async function demoSend(){
     if(count()>=LIMIT){ showPaywall(); return; }
     var inp=$("demoInput"); var text=inp.value.trim(); if(!text) return;
@@ -1372,10 +1445,7 @@
     log.appendChild(tp); log.scrollTop=log.scrollHeight;
     var btn=$("demoSend"); btn.disabled=true; status("");
     try{
-      var url="https://text.pollinations.ai/"+encodeURIComponent(text)+"?system="+encodeURIComponent(DEMO_SYS[agent()])+"&model=openai";
-      var r=await fetch(url);
-      if(!r.ok) throw new Error("demo busy ("+r.status+")");
-      var ans=(await r.text()).trim().slice(0,1200);
+      var ans=await demoCall(text);
       tp.remove(); addMsg("ai", esc(ans));
       bump();
       var left=LIMIT-count();
@@ -1383,7 +1453,8 @@
       else status(left+" free demo message"+(left===1?"":"s")+" left.");
     }catch(err){
       tp.remove();
-      var d=document.createElement("div"); d.className="aiw-msg err"; d.textContent="Demo hiccup: "+err.message+" — try again in a moment.";
+      inp.value=text;
+      var d=document.createElement("div"); d.className="aiw-msg err"; d.textContent="Demo hiccup: "+err.message+" — your message was restored, just press Ask again.";
       log.appendChild(d); log.scrollTop=log.scrollHeight;
     }
     btn.disabled=false;
